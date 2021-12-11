@@ -4,9 +4,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeService, editService } from '../../actions/actionCreators';
 
 export default function Table() {
-  const services = useSelector(state => state.list);
-  const search = useSelector(state => state.search);
+  const services = useSelector((state) => state.list);
+  const search = useSelector((state) => state.search);
   const dispatch = useDispatch();
+  const tableLength = 3;
 
   function handleDeleteClick(id) {
     return dispatch(removeService(id));
@@ -19,15 +20,13 @@ export default function Table() {
     return dispatch(editService(name, price, { state: true, index }));
   }
 
-  let filteredServices;
+  let filteredList = null;
 
-  if (search.query !== '') {
-    filteredServices = services.map((service) => {
-      if (!service.name.startsWith(search.query)) {
+  if (search.query) {
+    filteredList = services.map(({ id, name, price }) => {
+      if (!name.startsWith(search.query)) {
         return null;
       }
-
-      const { id, name, price } = service;
 
       return (
         <TableRow
@@ -39,14 +38,31 @@ export default function Table() {
           onEditClick={() => handleEditClick(id)}
         />
       );
-    })
+    });
 
-    if (!filteredServices.filter(Boolean).length) {
-      filteredServices = <tr>
-        <td colSpan="3">По вашему запросу ничего не найдено</td>
-      </tr>;
+    if (!filteredList.filter(Boolean).length) {
+      filteredList = (
+        <tr>
+          <td colSpan={tableLength}>
+            По вашему запросу ничего не найдено
+          </td>
+        </tr>
+      );
     }
   }
+
+  const list = services.map(({ id, name, price }) => {
+    return (
+      <TableRow
+        key={id}
+        id={id}
+        name={name}
+        price={price}
+        onDeleteClick={() => handleDeleteClick(id)}
+        onEditClick={() => handleEditClick(id)}
+      />
+    );
+  })
 
   return (
     <table className="Table">
@@ -57,22 +73,7 @@ export default function Table() {
           <th>Действия</th>
         </tr>
       </thead>
-      <tbody>
-        {filteredServices || services.map((service) => {
-          const { id, name, price } = service;
-
-          return (
-            <TableRow
-              key={id}
-              id={id}
-              name={name}
-              price={price}
-              onDeleteClick={() => handleDeleteClick(id)}
-              onEditClick={() => handleEditClick(id)}
-            />
-          );
-        })}
-      </tbody>
+      <tbody>{filteredList || list}</tbody>
     </table>
   );
 }

@@ -11,9 +11,7 @@ export default function Form() {
   const form = useSelector(state => state.form);
   const dispatch = useDispatch();
 
-  function handleInputChange({ target }) {
-    const { name, value } = target;
-
+  function handleInputChange({ target: { name, value } }) {
     dispatch(changeServiceField(name, value));
   }
 
